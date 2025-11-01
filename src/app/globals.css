@@ -9,6 +9,8 @@
   --terminal-accent: rgba(168, 168, 172, 0.32);
   --terminal-muted: rgba(200, 200, 205, 0.72);
   --prompt: #38bdf8;
+  --font-geist-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-geist-mono: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 @theme inline {

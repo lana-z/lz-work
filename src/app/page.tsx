@@ -22,10 +22,10 @@ function abbreviateUrl(url: string): string {
 
 export default function Home() {
   const commandSequence: CommandBlock[] = [
-    { prompt: "~(work:main) [py:3.11] $", command: "cd ~/code/lz" },
-    { prompt: "~/code/lz (main) [py:3.11] $", command: "cd work" },
+    { prompt: "~(work:main) [py:3.13] $", command: "cd ~/code/lz" },
+    { prompt: "~/code/lz (main) [py:3.13] $", command: "cd work" },
     {
-      prompt: "~/code/lz/work (main) [py:3.11] $",
+      prompt: "~/code/lz/work (main) [py:3.13] $",
       command: "just introduce",
       output: [
         {
@@ -36,7 +36,7 @@ export default function Home() {
       ],
     },
     {
-      prompt: "~/code/lz/work (main) [py:3.11] $",
+      prompt: "~/code/lz/work (main) [py:3.13] $",
       command: "just projects --current --limit 3",
       output: [
         {
@@ -63,14 +63,13 @@ export default function Home() {
       ],
     },
     {
-      prompt: "~/code/lz/work (main) [py:3.11] $",
+      prompt: "~/code/lz/work (main) [py:3.13] $",
       command: "just contact",
       output: [
         { type: "link", content: "lana@levelupeconomy.com", href: "mailto:lana@levelupeconomy.com" },
-        { type: "link", content: "lana@rooftop.global", href: "mailto:lana@rooftop.global" },
       ],
     },
-    { prompt: "~/code/lz/work (main) [py:3.11] $" },
+    { prompt: "~/code/lz/work (main) [py:3.13] $" },
   ];
 
   return (
