@@ -1,0 +1,11 @@
+<svg width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="12%" y1="0%" x2="88%" y2="100%">
+      <stop offset="0%" stop-color="#08080d" />
+      <stop offset="100%" stop-color="#151320" />
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="36" fill="url(#bg)" />
+  <text x="86" y="168" font-family="'IBM Plex Mono', 'SFMono-Regular', 'Menlo', 'Consolas', monospace" font-size="132" font-weight="600" fill="#f8f9ff">L </text>
+  <text x="170" y="168" font-family="'IBM Plex Mono', 'SFMono-Regular', 'Menlo', 'Consolas', monospace" font-size="132" font-weight="600" fill="#f8f9ff">Z</text>
+</svg>

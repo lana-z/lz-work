@@ -1,65 +1,139 @@
-import Image from "next/image";
+import Link from "next/link";
+
+type CommandOutput =
+  | { type: "text"; content: string }
+  | { type: "link"; content: string; href: string }
+  | { type: "project"; name: string; description: string; href?: string };
+
+type CommandBlock = {
+  prompt: string;
+  command?: string;
+  output?: CommandOutput[];
+};
+
+function abbreviateUrl(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
 
 export default function Home() {
+  const commandSequence: CommandBlock[] = [
+    { prompt: "~(work:main) [py:3.11] $", command: "cd ~/code/lz" },
+    { prompt: "~/code/lz (main) [py:3.11] $", command: "cd work" },
+    {
+      prompt: "~/code/lz/work (main) [py:3.11] $",
+      command: "just introduce",
+      output: [
+        {
+          type: "text",
+          content:
+            "Hey there, I\u2019m Lana Zumbrunn, an AI engineer and technical leader shipping agent systems, workflow optimizations, and technical upskilling curriculum.",
+        },
+      ],
+    },
+    {
+      prompt: "~/code/lz/work (main) [py:3.11] $",
+      command: "just projects --current --limit 3",
+      output: [
+        {
+          type: "project",
+          name: "Applied AI/ML Pilot",
+          description:
+            "Development and delivery of Applied AI/ML curriculum for Jordanian CS and EE university grads in partnership with the Crown Price Foundation\u2019s Future Skills Fund and Istidama Consulting.",
+          // href: "https://www.linkedin.com/posts/futureskillsfundjo_aispire-is-now-accepting-applications-from-activity-7385669034551443456-ypv2?utm_source=share&utm_medium=member_desktop&rcm=ACoAAADgXtkB-FVY8Y_rcPgHiPVOOtMLFQFzACc",
+        },
+        {
+          type: "project",
+          name: "Rooftop Platform",
+          description:
+            "Building a custom AI enabled platform for Rooftop Global, a women\u2019s emerging tech and investment community.",
+          // href: "https://rooftop.global/",
+        },
+        {
+          type: "project",
+          name: "AI Journal",
+          description:
+            "Personal project documenting my learning journey and experiments with new releases.",
+          // href: "https://add-ai-journal-link",
+        },
+      ],
+    },
+    {
+      prompt: "~/code/lz/work (main) [py:3.11] $",
+      command: "just contact",
+      output: [
+        { type: "link", content: "lana@levelupeconomy.com", href: "mailto:lana@levelupeconomy.com" },
+        { type: "link", content: "lana@rooftop.global", href: "mailto:lana@rooftop.global" },
+      ],
+    },
+    { prompt: "~/code/lz/work (main) [py:3.11] $" },
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="min-h-screen px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-3xl font-mono text-[15px] leading-7 text-foreground sm:text-base">
+        {commandSequence.map((block, index) => (
+          <div key={`${block.prompt}-${block.command ?? "prompt"}-${index}`} className="mb-2">
+            <p className="m-0">
+              <span className="text-prompt">{block.prompt}</span>
+              {block.command ? (
+                <>
+                  {" "}
+                  <span>{block.command}</span>
+                </>
+              ) : (
+                <>
+                  {" "}
+                  <span className="blink text-prompt" aria-hidden>
+                    █
+                  </span>
+                </>
+              )}
+            </p>
+            {block.output && (
+              <div className="mt-1 text-foreground-output">
+                {block.output.map((line, lineIndex) => {
+                  if (line.type === "text") {
+                    return (
+                      <p key={`${line.content}-${lineIndex}`} className="m-0">
+                        {line.content}
+                      </p>
+                    );
+                  }
+
+                  if (line.type === "link") {
+                    return (
+                      <p key={`${line.content}-${lineIndex}`} className="m-0">
+                        <Link href={line.href} className="transition hover:text-prompt">
+                          {line.content}
+                        </Link>
+                      </p>
+                    );
+                  }
+
+                  return (
+                    <p key={`${line.name}-${lineIndex}`} className="m-0">
+                      {line.name}: {line.description}
+                      {line.href && (
+                        <>
+                          {" "}
+                          <Link href={line.href} className="transition hover:text-prompt">
+                            {abbreviateUrl(line.href)}
+                          </Link>
+                        </>
+                      )}
+                    </p>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </main>
   );
 }
