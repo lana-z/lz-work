@@ -1,7 +1,8 @@
 ## Lana Zumbrunn CLI Portfolio
 
-A CLI-themed personal portfolio for Lana Zumbrunn. The landing page mirrors a macOS terminal session, showing staged commands (`just introduce`, `just projects`, `just contact`) with AI-focused project highlights, contact addresses, and a blinking prompt.
-The cursor is now interactive: click anywhere (or press `Tab`) to focus the hidden input, type commands inline, and hit `Enter` to append them to the transcript.
+A CLI-themed personal portfolio for Lana Zumbrunn. The landing page mirrors a macOS terminal session, showing staged commands (`just introduce`, `just projects`, `just contact`) with AI-focused project highlights, contact addresses, and a blinking prompt.  
+Live site: https://lanazumbrunn.com
+The cursor is interactive: click anywhere (or press `Tab`) to focus the hidden input, type commands inline, and hit `Enter` to append them to the transcript.
 
 ### Supported Commands
 

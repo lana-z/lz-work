@@ -231,15 +231,6 @@ function getCommandOutput(command: string): CommandOutput[] | undefined {
         { type: "text", content: "Business Retention & Expansion International: Certified Consultant" },
         { type: "text", content: "Cloud Security Alliance: Trusted AI Safety Expert (in progress)" },
       ];
-    case "just background":
-      return [
-        {
-          type: "text",
-          content: "AI engineer + technical leader building agent platforms, automation workflows, and upskilling programs.",
-        },
-        { type: "text", content: "Former strategy + ops leader (public-private partnerships, venture, community programming)." },
-        { type: "text", content: "Organizer/member: AI Tinkerers, PuPPy (Seattle Python), TechWell AI Con." },
-      ];
     case "just speaking":
       return sectionOutputs(SPEAKING_SECTIONS);
     case "just community":
