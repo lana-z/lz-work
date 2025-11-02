@@ -268,16 +268,14 @@ const INITIAL_HISTORY: CommandBlock[] = [
 export default function Home() {
   const [history, setHistory] = useState<CommandBlock[]>(INITIAL_HISTORY);
   const [inputValue, setInputValue] = useState("");
+  const [hasInteracted, setHasInteracted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
+    if (!hasInteracted) return;
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [history]);
+  }, [history, hasInteracted]);
 
   const handleCommand = (rawInput: string) => {
     const trimmed = rawInput.trim();
@@ -287,8 +285,14 @@ export default function Home() {
       { type: "text", content: "Command not found. Try: 'just help'." },
     ];
 
+    setHasInteracted(true);
     setHistory((prev) => [...prev, { prompt: WORK_PROMPT, command: trimmed, output }]);
     setInputValue("");
+  };
+
+  const focusInput = () => {
+    setHasInteracted(true);
+    inputRef.current?.focus();
   };
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -301,7 +305,7 @@ export default function Home() {
   return (
     <main
       className="min-h-screen px-4 py-16 sm:px-6 lg:px-8"
-      onClick={() => inputRef.current?.focus()}
+      onClick={focusInput}
     >
       <div className="mx-auto w-full max-w-3xl font-mono text-[15px] leading-7 text-foreground sm:text-base">
         {history.map((block, index) => (
@@ -368,6 +372,7 @@ export default function Home() {
           value={inputValue}
           onChange={(event) => setInputValue(event.target.value)}
           onKeyDown={handleKeyDown}
+          onFocus={() => setHasInteracted(true)}
           className="fixed left-[-9999px] top-0 h-0 w-0 opacity-0"
           aria-label="CLI command input"
         />
