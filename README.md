@@ -7,19 +7,16 @@ The cursor is now interactive: click anywhere (or press `Tab`) to focus the hidd
 
 ```
 just introduce
-just projects
-just projects --current
-just projects --current --limit 3
-just projects --past
 just contact
 just social
-just education
-just background
+just projects [--current] [--past] [--limit N]
 just speaking
-just hackathon
+just community
 just forfun
+just education
 just help
 ```
+
 > Extend or customize commands by editing `getCommandOutput` in `src/app/page.tsx`.
 
 ## Run Locally
@@ -46,6 +43,6 @@ The project is ready for Vercel. Push a feature branch, open a PR, then promote 
 
 ## Extend or Customize
 
-- Edit `KNOWN_COMMANDS` and `getCommandOutput` in `src/app/page.tsx` to add, update, or remove CLI commands.
+- Adjust command routing in `getCommandOutput` (and, if needed, the helper arrays near the top of `src/app/page.tsx`) to add, update, or remove CLI commands.
 - Each command appends a `(prompt, command, output)` entry to the history array; adjust `INITIAL_HISTORY` if you want a different default transcript.
 - Favicon lives at `src/app/icon.svg`. Replace it with a new SVG if you update branding.

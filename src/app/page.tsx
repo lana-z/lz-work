@@ -19,21 +19,161 @@ const INITIAL_PROMPT = `~(work:main) [py:${PY_VERSION}] $`;
 const LZ_PROMPT = `~/code/lz (main) [py:${PY_VERSION}] $`;
 const WORK_PROMPT = `~/code/lz/work (main) [py:${PY_VERSION}] $`;
 
-const KNOWN_COMMANDS = [
+type Project = {
+  name: string;
+  description: string;
+  href?: string;
+};
+
+const CURRENT_PROJECTS: Project[] = [
+  {
+    name: "Applied AI/ML Pilot",
+    description:
+      "Developing and delivering a six month bootcamp applied AI/ML curriculum for Jordanian CS and EE university grads in partnership with the Crown Prince Foundation’s Future Skills Fund and Istidama Consulting.",
+  },
+  {
+    name: "Rooftop Platform",
+    description:
+      "Building a custom AI enabled platform for Rooftop Global, a women’s emerging tech and investment community.",
+  },
+  {
+    name: "Teaching Assistant Agent",
+    description:
+      "Exploring agent frameworks and architectures for an agentic TA system, grading and mentoring bootcamp students via GitHub PRs.",
+  },
+  {
+    name: "Section",
+    description:
+      "Leading Section AI School enterprise prompt engineering sessions and CEO AI cohorts.",
+  },
+  {
+    name: "Guzakuza",
+    description:
+      "Designing and delivering prompt engineering + AI workflow modules for women agri-business founders through Guzakuza’s Ignite Accelerator.",
+  },
+];
+
+const PAST_PROJECTS: Project[] = [
+  {
+    name: "HeyDev",
+    description:
+      "Led a team of five devs to design and build a multi-agent DevRel productivity system with blog content from GitHub changelogs, community sentiment analysis, and daily recommended actions.",
+  },
+  {
+    name: "Tradesy",
+    description:
+      "Prototyped an agentic solution connecting early-career job seekers with trade professions.",
+  },
+  {
+    name: "Kimchi Token",
+    description:
+      "Designed and built kimchitoken.com and Telegram community integrations for KTZ blockchain token launch.",
+  },
+  {
+    name: "PR Council",
+    description:
+      "Led AI readiness training for PR Council agencies covering automation, ethics, and client enablement.",
+  },
+  {
+    name: "AB InBev",
+    description:
+      "Delivered training on advanced AI concepts for AB InBev Distribution Managers across the Americas and Europe.",
+  },
+];
+
+const FOR_FUN_PROJECTS: Project[] = [
+  {
+    name: "AI Journal",
+    description:
+      "Personal project documenting my learning journey and experiments with new releases.",
+  },
+  {
+    name: "Oh, Kale No!",
+    description: "Mental health check-in companion with AI chat and daily forward-momentum prompts.",
+    href: "https://ohkaleno.xyz/",
+  },
+  {
+    name: "Mountain House Meal Planner",
+    description: "Agent that parses grocery receipts, checks Seattle weather, and suggests dinner recipes.",
+  },
+  {
+    name: "Fitness Trainer Agent",
+    description: "Prototype agent generating adaptive workouts, habit nudges, and progress summaries from wearable data and check-ins.",
+  },
+  {
+    name: "Donut Dashboard",
+    description: "Dashboard and gamification of open source dev community contributions.",
+  },
+  {
+    name: "Running",
+    description: "Training for my 10th full marathon.",
+  },
+  {
+    name: "Baking",
+    description: "Foodie, baking pumpkin scones and many yummy seasonal favorites.",
+  },
+];
+
+const SPEAKING_SECTIONS = [
+  {
+    title: "Major conferences I've spoken at:",
+    lines: ["SXSW", "Rise of the Rest", "InBIA", "Global Accelerator Network", "Global Entrepreneurship Congress", "VentureWell"],
+  },
+  {
+    title: "Technical meetups and events I've given a talk or demoed at:",
+    lines: ["AI Tinkerers", "PuPPy (Puget Sound Programming Python)", "Seattle Tech Week", "AI2"],
+  },
+];
+
+const COMMUNITY_SECTIONS = [
+  {
+    title: "Puget Sound Python:",
+    lines: ["Create the fundraising strategy for PuPPy's 2026 sponsorship campaign and lead implementation in Q4 2025."],
+  },
+  {
+    title: "Girls Code Lincoln:",
+    lines: ["Founder and board member of Girls Code Lincoln (501c3) serving 1000+ girls in tech since 2016."],
+  },
+  {
+    title: "Fueling the Future of Female-Founded Innovation:",
+    lines: ["Hosting workshops to support female-founded startups and women investors in Seattle with partners at Wells Fargo, Boeing Ventures, E8, M12, First Row Partners, and Generationship."],
+  },
+];
+
+const HELP_LINES = [
   "just introduce",
-  "just projects",
-  "just projects --current",
-  "just projects --current --limit 3",
-  "just projects --past",
   "just contact",
   "just social",
-  "just education",
-  "just background",
+  "just projects [--current] [--past] [--limit N]",
   "just speaking",
-  "just hackathon",
+  "just community",
   "just forfun",
+  "just education",
   "just help",
-] as const;
+];
+
+function projectOutputs(projects: Project[], limit?: number): CommandOutput[] {
+  const max = typeof limit === "number" && !Number.isNaN(limit) ? Math.max(limit, 0) : undefined;
+  const list = typeof max === "number" ? projects.slice(0, max) : projects;
+  const entries: CommandOutput[] = [];
+  list.forEach((project) => {
+    entries.push({ type: "text", content: `${project.name}:` });
+    entries.push({ type: "text", content: `  ${project.description}` });
+    if (project.href) {
+      entries.push({ type: "link", content: abbreviateUrl(project.href), href: project.href });
+    }
+  });
+  return entries;
+}
+
+function sectionOutputs(sections: { title: string; lines: string[] }[]): CommandOutput[] {
+  const entries: CommandOutput[] = [];
+  sections.forEach((section) => {
+    entries.push({ type: "text", content: section.title });
+    section.lines.forEach((line) => entries.push({ type: "text", content: `  ${line}` }));
+  });
+  return entries;
+}
 
 function abbreviateUrl(url: string): string {
   try {
@@ -47,136 +187,32 @@ function abbreviateUrl(url: string): string {
 function getCommandOutput(command: string): CommandOutput[] | undefined {
   const normalized = command.trim().toLowerCase();
 
+  if (normalized.startsWith("just projects")) {
+    const usePast = normalized.includes("--past");
+    const useCurrent = normalized.includes("--current");
+    const limitMatch = normalized.match(/--limit\s+(\d+)/);
+    const limit = limitMatch ? Number.parseInt(limitMatch[1], 10) : undefined;
+
+    let projects: Project[];
+    if (usePast) {
+      projects = PAST_PROJECTS;
+    } else if (useCurrent) {
+      projects = CURRENT_PROJECTS;
+    } else {
+      // No flag means show all: current first, then past
+      projects = [...CURRENT_PROJECTS, ...PAST_PROJECTS];
+    }
+
+    return projectOutputs(projects, limit);
+  }
+
   switch (normalized) {
     case "just introduce":
       return [
         {
           type: "text",
           content:
-            "Hey there, I’m Lana Zumbrunn, an AI engineer and technical leader shipping agent systems, workflow optimizations, and technical upskilling curriculum.",
-        },
-      ];
-    case "just projects --current --limit 3":
-      return [
-        {
-          type: "project",
-          name: "Applied AI/ML Pilot",
-          description:
-            "Development and delivery of Applied AI/ML curriculum for Jordanian CS and EE university grads in partnership with the Crown Prince Foundation’s Future Skills Fund and Istidama Consulting.",
-          // href: "https://www.linkedin.com/posts/futureskillsfundjo_aispire-is-now-accepting-applications-from-activity-7385669034551443456-ypv2?utm_source=share&utm_medium=member_desktop&rcm=ACoAAADgXtkB-FVY8Y_rcPgHiPVOOtMLFQFzACc",
-        },
-        {
-          type: "project",
-          name: "Rooftop Platform",
-          description:
-            "Building a custom AI enabled platform for Rooftop Global, a women’s emerging tech and investment community.",
-          // href: "https://rooftop.global/",
-        },
-        {
-          type: "project",
-          name: "AI Journal",
-          description:
-            "Personal project documenting my learning journey and experiments with new releases.",
-          // href: "https://add-ai-journal-link",
-        },
-      ];
-    case "just projects --current":
-      return [
-        {
-          type: "project",
-          name: "Applied AI/ML Pilot",
-          description:
-            "Development and delivery of Applied AI/ML curriculum for Jordanian CS and EE university grads in partnership with the Crown Prince Foundation’s Future Skills Fund and Istidama Consulting.",
-        },
-        {
-          type: "project",
-          name: "Guzakuza AI Training",
-          description:
-            "Designing AI training modules for women-led agri-business founders through Guzakuza’s AISP program.",
-        },
-        {
-          type: "project",
-          name: "Section Advanced Prompt Training",
-          description:
-            "Leading Section School cohorts on advanced prompt design, agent workflows, and evaluation systems.",
-        },
-        {
-          type: "project",
-          name: "Rooftop Platform",
-          description:
-            "Building a custom AI enabled platform for Rooftop Global, a women’s emerging tech and investment community.",
-        },
-        {
-          type: "project",
-          name: "AI Journal",
-          description:
-            "Personal project documenting my learning journey and experiments with new releases.",
-        },
-        {
-          type: "project",
-          name: "AI Leads",
-          description:
-            "Outbound AI agent that researches prospects, enriches context, and drafts channel-specific outreach.",
-        },
-      ];
-
-    case "just projects":
-      return [
-        {
-          type: "project",
-          name: "Applied AI/ML Pilot",
-          description:
-            "Development and delivery of Applied AI/ML curriculum for Jordanian CS and EE university grads in partnership with the Crown Prince Foundation’s Future Skills Fund and Istidama Consulting.",
-        },
-        {
-          type: "project",
-          name: "Rooftop Platform",
-          description:
-            "Building a custom AI enabled platform for Rooftop Global, a women’s emerging tech and investment community.",
-        },
-        {
-          type: "project",
-          name: "AI Journal",
-          description:
-            "Personal project documenting my learning journey and experiments with new releases.",
-        },
-        {
-          type: "project",
-          name: "AI Leads",
-          description: "Outbound AI agent that researches prospects, enriches context, and drafts tailored outreach for sales teams.",
-        },
-      ];
-    case "just projects --past":
-      return [
-        {
-          type: "project",
-          name: "Kimchi Token",
-          description:
-            "Designed and built kimchitoken.com and Telegram community integrations for KTZ blockchain token launch.",
-        },
-        {
-          type: "project",
-          name: "Guzakuza AI Optimization",
-          description:
-            "Designed and delivered AI fundamentals + workflow design modules for women agri-business founders in Africa in partnership with Guzakuza's Ignite accelerator.",
-        },
-        {
-          type: "project",
-          name: "Section Advanced Prompt Engineering",
-          description:
-            "Developed enterprise prompt engineering curriculum and live cohort facilitation for Section AI School.",
-        },
-        {
-          type: "project",
-          name: "PR Council AI Readiness",
-          description:
-            "Led AI readiness training for PR Council agencies covering automation, ethics, and client enablement.",
-        },
-        {
-          type: "project",
-          name: "AB InBev Ops",
-          description:
-            "Consulted on AI enablement across the Americas and Europe for AB InBev Distribution Managers.",
+            "Hey there, I’m Lana Zumbrunn, an AI engineer shipping agent systems, workflow optimizations, and technical upskilling curriculum.",
         },
       ];
     case "just contact":
@@ -192,7 +228,7 @@ function getCommandOutput(command: string): CommandOutput[] | undefined {
       return [
         { type: "text", content: "University of Nebraska: Bachelor of Arts in Communication Studies and Poli Sci" },
         { type: "text", content: "Code Fellows: Certificate of Advanced Software Development in Python" },
-        { type: "text", content: "Business Retention & Expansion International: Certified Consultant (BREP)" },
+        { type: "text", content: "Business Retention & Expansion International: Certified Consultant" },
         { type: "text", content: "Cloud Security Alliance: Trusted AI Safety Expert (in progress)" },
       ];
     case "just background":
@@ -205,52 +241,13 @@ function getCommandOutput(command: string): CommandOutput[] | undefined {
         { type: "text", content: "Organizer/member: AI Tinkerers, PuPPy (Seattle Python), TechWell AI Con." },
       ];
     case "just speaking":
-      return [
-        { type: "text", content: "Major conferences:" },
-        { type: "text", content: "  SXSW, Rise of the Rest, InBIA, Global Accelerator Network, Global Entrepreneurship Congress, VentureWell" },
-        { type: "text", content: "" },
-        { type: "text", content: "Technical talks and demos:" },
-        { type: "text", content: "  AI Tinkerers, PuPPy (Puget Sound Programming Python), Fueling the Future of Female-Founded Innovation, Seattle Tech Week, AI2" },
-      ];
-    case "just hackathon":
-      return [
-        {
-          type: "text",
-          content: "AI Tinkerers Agents Hackathon, 2nd place: Built a multi-agent system for DevRel productivity including GitHub changelog to content, community sentiment analysis, and daily recommended actions, receiving a top rank AI Tinkerers Seattle hackathon in 2025; Invited to pitch at AI2.",
-        },
-        {
-          type: "text",
-          content: "Seattle Hackathon for Public Good, Most Impact award: Built an agentic system for early career job-seekers to get connected with trade professions and increase their relevant experience.",
-        },
-      ];
+      return sectionOutputs(SPEAKING_SECTIONS);
+    case "just community":
+      return sectionOutputs(COMMUNITY_SECTIONS);
     case "just forfun":
-      return [
-        { type: "text", content: "Experiments and side projects:" },
-        { type: "link", content: "Oh, Kale No!: A mental health check-in with AI chat: ohkaleno.xyz", href: "https://ohkaleno.xyz/" },
-        {
-          type: "project",
-          name: "Mountain House Meal Planner",
-          description:
-            "Household agent that parses grocery receipts, checks Seattle weather, and generates adaptive dinner plans.",
-        },
-        {
-          type: "project",
-          name: "Fitness Trainer Agent",
-          description:
-            "Personal agent generating workout plans, nudges, and more from Apple Fitness and other iOS app data with daily check-ins.",
-        },
-        {
-          type: "project",
-          name: "Donut Dashboard",
-          description:
-            " Gamification of open source dev community contributions.",
-        },
-      ];
+      return projectOutputs(FOR_FUN_PROJECTS);
     case "just help":
-      return [
-        { type: "text", content: "Available commands:" },
-        ...KNOWN_COMMANDS.map((cmd) => ({ type: "text" as const, content: `  ${cmd}` })),
-      ];
+      return HELP_LINES.map((line) => ({ type: "text" as const, content: line }));
     default:
       return undefined;
   }
@@ -287,7 +284,7 @@ export default function Home() {
     if (!trimmed) return;
 
     const output = getCommandOutput(trimmed) ?? [
-      { type: "text", content: "Command not found. Try just help." },
+      { type: "text", content: "Command not found. Try: 'just help'." },
     ];
 
     setHistory((prev) => [...prev, { prompt: WORK_PROMPT, command: trimmed, output }]);
@@ -356,7 +353,7 @@ export default function Home() {
         <div className="mb-2">
           <p className="m-0">
             <span className="text-prompt">{WORK_PROMPT}</span>{" "}
-            <span>{inputValue}</span>{" "}
+            <span>{inputValue}</span>
             <span className="blink text-prompt" aria-hidden>
               █
             </span>
