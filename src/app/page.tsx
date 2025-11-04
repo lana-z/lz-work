@@ -4,9 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 type CommandOutput =
-  | { type: "text"; content: string }
-  | { type: "link"; content: string; href: string }
-  | { type: "project"; name: string; description: string; href?: string };
+  | { type: "text"; content: string; extraClass?: string }
+  | { type: "link"; content: string; href: string; extraClass?: string };
 
 type CommandBlock = {
   prompt: string;
@@ -55,7 +54,7 @@ const CURRENT_PROJECTS: Project[] = [
 
 const PAST_PROJECTS: Project[] = [
   {
-    name: "HeyDev",
+    name: "HeyDev Advocate",
     description:
       "Led a team of five devs to design and build a multi-agent DevRel productivity system with blog content from GitHub changelogs, community sentiment analysis, and daily recommended actions.",
   },
@@ -90,14 +89,14 @@ const FOR_FUN_PROJECTS: Project[] = [
   {
     name: "Oh, Kale No!",
     description: "Mental health check-in companion with AI chat and daily forward-momentum prompts.",
-    href: "https://ohkaleno.xyz/",
+    // href: "https://ohkaleno.xyz/",
   },
   {
     name: "Mountain House Meal Planner",
     description: "Agent that parses grocery receipts, checks Seattle weather, and suggests dinner recipes.",
   },
   {
-    name: "Fitness Trainer Agent",
+    name: "Fitness Trainer",
     description: "Prototype agent generating adaptive workouts, habit nudges, and progress summaries from wearable data and check-ins.",
   },
   {
@@ -121,18 +120,21 @@ const SPEAKING_SECTIONS = [
   },
   {
     title: "Technical meetups and events I've given a talk or demoed at:",
-    lines: ["AI Tinkerers", "PuPPy (Puget Sound Programming Python)", "Seattle Tech Week", "AI2"],
+    lines: ["AI Tinkerers", "Puget Sound Programming Python (PuPPy)", "Seattle Tech Week", "AI2"],
   },
 ];
 
 const COMMUNITY_SECTIONS = [
   {
-    title: "Puget Sound Python:",
-    lines: ["Create the fundraising strategy for PuPPy's 2026 sponsorship campaign and lead implementation in Q4 2025."],
-  },
-  {
     title: "Girls Code Lincoln:",
     lines: ["Founder and board member of Girls Code Lincoln (501c3) serving 1000+ girls in tech since 2016."],
+  },
+  { title: "AI Tinkerer:",
+    lines: ["Presented talks 2x; Practical Agents Hackathon winner (2nd place), June 2025; invovled since 2024."]
+  },
+  {
+    title: "Puget Sound Programming Python (PuPPy):",
+    lines: ["Created the fundraising strategy for PuPPy's 2026 sponsorship campaign and lead implementation in Q4 2025; member since 2023."],
   },
   {
     title: "Fueling the Future of Female-Founded Innovation:",
@@ -157,10 +159,23 @@ function projectOutputs(projects: Project[], limit?: number): CommandOutput[] {
   const list = typeof max === "number" ? projects.slice(0, max) : projects;
   const entries: CommandOutput[] = [];
   list.forEach((project) => {
-    entries.push({ type: "text", content: `${project.name}:` });
-    entries.push({ type: "text", content: `  ${project.description}` });
+    entries.push({
+      type: "text",
+      content: project.name,
+      extraClass: "project-title",
+    });
+    entries.push({
+      type: "text",
+      content: `> ${project.description}`,
+      extraClass: "project-description",
+    });
     if (project.href) {
-      entries.push({ type: "link", content: abbreviateUrl(project.href), href: project.href });
+      entries.push({
+        type: "link",
+        content: abbreviateUrl(project.href),
+        href: project.href,
+        extraClass: "project-link",
+      });
     }
   });
   return entries;
@@ -169,8 +184,10 @@ function projectOutputs(projects: Project[], limit?: number): CommandOutput[] {
 function sectionOutputs(sections: { title: string; lines: string[] }[]): CommandOutput[] {
   const entries: CommandOutput[] = [];
   sections.forEach((section) => {
-    entries.push({ type: "text", content: section.title });
-    section.lines.forEach((line) => entries.push({ type: "text", content: `  ${line}` }));
+    entries.push({ type: "text", content: section.title, extraClass: "section-title" });
+    section.lines.forEach((line) =>
+      entries.push({ type: "text", content: `> ${line}`, extraClass: "section-line" })
+    );
   });
   return entries;
 }
@@ -211,25 +228,40 @@ function getCommandOutput(command: string): CommandOutput[] | undefined {
       return [
         {
           type: "text",
-          content:
-            "Hey there, I’m Lana Zumbrunn, an AI engineer shipping agent systems, workflow optimizations, and technical upskilling curriculum.",
+          content: "> Hey there, I’m <span class=\"highlight\">Lana Zumbrunn</span>, an AI engineer shipping agent systems, workflow optimizations, and technical upskilling curriculum.",
+          extraClass: "section-line",
         },
       ];
     case "just contact":
       return [
-        { type: "link", content: "lana@levelupeconomy.com", href: "mailto:lana@levelupeconomy.com" },
+        {
+          type: "link",
+          content: "lana@levelupeconomy.com",
+          href: "mailto:lana@levelupeconomy.com",
+          extraClass: "section-line",
+        },
       ];
     case "just social":
       return [
-        { type: "link", content: "x.com/lan_azk", href: "https://x.com/lan_azk" },
-        { type: "link", content: "linkedin.com/in/lanazumbrunn", href: "https://linkedin.com/in/lanazumbrunn" },
+        {
+          type: "link",
+          content: "linkedin.com/in/lanazumbrunn",
+          href: "https://linkedin.com/in/lanazumbrunn",
+          extraClass: "section-line",
+        },
+        {
+          type: "link",
+          content: "x.com/lan_azk",
+          href: "https://x.com/lan_azk",
+          extraClass: "section-line",
+        },
       ];
     case "just education":
       return [
-        { type: "text", content: "University of Nebraska: Bachelor of Arts in Communication Studies and Poli Sci" },
-        { type: "text", content: "Code Fellows: Certificate of Advanced Software Development in Python" },
-        { type: "text", content: "Business Retention & Expansion International: Certified Consultant" },
-        { type: "text", content: "Cloud Security Alliance: Trusted AI Safety Expert (in progress)" },
+        { type: "text", content: "> University of Nebraska: BA in Communication Studies and Poli Sci", extraClass: "section-line" },
+        { type: "text", content: "> Code Fellows: Certificate of Advanced Software Development in Python", extraClass: "section-line" },
+        { type: "text", content: "> Business Retention & Expansion International: Certified Consultant", extraClass: "section-line" },
+        { type: "text", content: "> Cloud Security Alliance: Trusted AI Safety Expert (in progress)", extraClass: "section-line" },
       ];
     case "just speaking":
       return sectionOutputs(SPEAKING_SECTIONS);
@@ -238,7 +270,7 @@ function getCommandOutput(command: string): CommandOutput[] | undefined {
     case "just forfun":
       return projectOutputs(FOR_FUN_PROJECTS);
     case "just help":
-      return HELP_LINES.map((line) => ({ type: "text" as const, content: line }));
+      return HELP_LINES.map((line) => ({ type: "text", content: line, extraClass: "section-line" }));
     default:
       return undefined;
   }
@@ -273,7 +305,7 @@ export default function Home() {
     if (!trimmed) return;
 
     const output = getCommandOutput(trimmed) ?? [
-      { type: "text", content: "Command not found. Try: 'just help'." },
+      { type: "text", content: "Command not found. Try: 'just help'.", extraClass: "system-message" },
     ];
 
     setHasInteracted(true);
@@ -295,10 +327,10 @@ export default function Home() {
 
   return (
     <main
-      className="min-h-screen px-4 py-16 sm:px-6 lg:px-8"
+      className="terminal min-h-screen px-4 py-16 sm:px-6 lg:px-8"
       onClick={focusInput}
     >
-      <div className="mx-auto w-full max-w-3xl font-mono text-[15px] leading-7 text-foreground sm:text-base">
+      <div className="mx-auto w-full max-w-3xl font-mono text-[15px] leading-7 text-foreground sm:text-base whitespace-pre-wrap break-words">
         {history.map((block, index) => (
           <div key={`${block.prompt}-${block.command}-${index}`} className="mb-2">
             <p className="m-0">
@@ -310,35 +342,28 @@ export default function Home() {
                 {block.output.map((line, lineIndex) => {
                   if (line.type === "text") {
                     return (
-                      <p key={`${line.content}-${lineIndex}`} className="m-0">
-                        {line.content}
-                      </p>
+                      <p
+                        key={`${line.content}-${lineIndex}`}
+                        className={`m-0 ${line.extraClass ?? "section-line"}`.trim()}
+                        dangerouslySetInnerHTML={{ __html: line.content }}
+                      />
                     );
                   }
 
                   if (line.type === "link") {
                     return (
-                      <p key={`${line.content}-${lineIndex}`} className="m-0">
+                      <p
+                        key={`${line.content}-${lineIndex}`}
+                        className={`m-0 ${line.extraClass ?? "section-link"}`.trim()}
+                      >
                         <Link href={line.href} className="transition hover:text-prompt">
-                          {line.content}
+                          <span dangerouslySetInnerHTML={{ __html: line.content }} />
                         </Link>
                       </p>
                     );
                   }
 
-                  return (
-                    <p key={`${line.name}-${lineIndex}`} className="m-0">
-                      {line.name}: {line.description}
-                      {line.href && (
-                        <>
-                          {" "}
-                          <Link href={line.href} className="transition hover:text-prompt">
-                            {abbreviateUrl(line.href)}
-                          </Link>
-                        </>
-                      )}
-                    </p>
-                  );
+                  return null;
                 })}
               </div>
             )}

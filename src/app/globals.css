@@ -50,6 +50,50 @@ a {
   animation: blink 1s steps(2, start) infinite;
 }
 
+.terminal {
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .terminal {
+    padding: 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+.project-title {
+  color: #f5f5f5;
+  font-weight: 600;
+  margin-top: 0.75rem;
+}
+
+.project-description {
+  color: #c5c5c5;
+  margin-left: 1ch;
+}
+
+.section-title {
+  color: #f5f5f5;
+  font-weight: 600;
+  margin-top: 0.75rem;
+}
+
+.section-line {
+  color: #cfcfcf;
+  margin-left: 1ch;
+}
+
+.section-link-strong {
+  color: #ffffff;
+  font-weight: 600;
+  margin-left: 1ch;
+}
+
+.highlight {
+  color: #ffffff;
+  font-weight: 600;
+}
+
 @keyframes blink {
   0%,
   100% {
