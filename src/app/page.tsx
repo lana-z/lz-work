@@ -348,7 +348,9 @@ export default function Home() {
         <div className="mb-2">
           <p className="m-0">
             <span className="text-prompt">{WORK_PROMPT}</span>{" "}
-            <span>{inputValue}</span>
+            <span dir="ltr" className="inline-block min-w-[1ch] whitespace-pre">
+              {inputValue}
+            </span>
             <span className="blink text-prompt" aria-hidden>
               █
             </span>
@@ -364,6 +366,11 @@ export default function Home() {
           onChange={(event) => setInputValue(event.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => setHasInteracted(true)}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          dir="ltr"
+          inputMode="text"
           className="fixed left-[-9999px] top-0 h-0 w-0 opacity-0"
           aria-label="CLI command input"
         />
