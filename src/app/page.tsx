@@ -240,6 +240,12 @@ function getCommandOutput(command: string): CommandOutput[] | undefined {
           href: "mailto:lana@levelupeconomy.com",
           extraClass: "section-line",
         },
+        {
+          type: "link",
+          content: "github.com/lana-z",
+          href: "https://github.com/lana-z",
+          extraClass: "section-line",
+        },
       ];
     case "just social":
       return [
