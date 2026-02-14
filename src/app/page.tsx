@@ -322,6 +322,25 @@ export default function Home() {
   const focusInput = () => {
     setHasInteracted(true);
     inputRef.current?.focus();
+    syncCursorToEnd();
+  };
+
+  const syncCursorToEnd = () => {
+    const input = inputRef.current;
+    if (!input) return;
+    const end = input.value.length;
+    requestAnimationFrame(() => {
+      try {
+        input.setSelectionRange(end, end);
+      } catch {
+        // Some mobile browsers may throw for hidden inputs; ignore safely.
+      }
+    });
+  };
+
+  const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+    setInputValue(event.target.value);
+    syncCursorToEnd();
   };
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -394,9 +413,12 @@ export default function Home() {
           ref={inputRef}
           type="text"
           value={inputValue}
-          onChange={(event) => setInputValue(event.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => setHasInteracted(true)}
+          onFocus={() => {
+            setHasInteracted(true);
+            syncCursorToEnd();
+          }}
           autoCapitalize="none"
           autoCorrect="off"
           spellCheck={false}

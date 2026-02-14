@@ -38,6 +38,12 @@ npm run build
 
 > `npm run build` requires network access (for font downloads) and permission to spawn helper processes; run locally outside of sandboxed environments.
 
+## Mobile Input Verification (Android)
+
+For the Android text-input rendering fix and regression checks, see:
+
+- `docs/android-input-rendering-fix.md`
+
 ## Deployment
 
 The project is ready for Vercel. Push a feature branch, open a PR, then promote to `main` once verified.👍
